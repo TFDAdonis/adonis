@@ -1,0 +1,85 @@
+// 📊 1. Définir les listes de données
+var annees = ee.List.sequence(2014, 2024);
+var salinite = ee.List([1.010, 0.985, 1.055, 1.060, 1.015, 1.060, 1.050, 1.090, 1.045, 1.105, 1.140]);
+var precipitation = ee.List([405, 470, 380, 395, 455, 410, 420, 390, 435, 375, 350]);
+
+// 🧾 2. Créer la FeatureCollection
+var data = ee.FeatureCollection(
+  annees.map(function(annee) {
+    var idx = annees.indexOf(annee);
+    return ee.Feature(null, {
+      'Année': annee,
+      'Salinité': salinite.get(idx),
+      'Précipitations': precipitation.get(idx)
+    });
+  })
+);
+
+// 👁️ 3. Afficher la collection pour vérification
+print("Données de salinité et précipitations", data);
+
+// 📈 4. Créer le graphique à deux axes
+var chart = ui.Chart.feature.byFeature({
+  features: data,
+  xProperty: 'Année',
+  yProperties: ['Salinité', 'Précipitations']
+}).setChartType('LineChart')
+  .setOptions({
+    title: 'Évolution annuelle de la Salinité et des Précipitations (2014–2024)',
+    hAxis: {title: 'Année'},
+    series: {
+      0: {targetAxisIndex: 0, color: 'blue'},   // Salinité
+      1: {targetAxisIndex: 1, color: 'green'}   // Précipitations
+    },
+    vAxes: {
+      0: {title: 'Indice de Salinité'},
+      1: {title: 'Précipitations (mm)'}
+    },
+    pointSize: 5,
+    lineWidth: 2
+  });
+
+print(chart);
+
+// 📊 1. Définir les listes de données
+var annees = ee.List.sequence(2014, 2024);
+var salinite = ee.List([1.010, 0.985, 1.055, 1.060, 1.015, 1.060, 1.050, 1.090, 1.045, 1.105, 1.140]);
+var precipitation = ee.List([405, 470, 380, 395, 455, 410, 420, 390, 435, 375, 350]);
+
+// 🧾 2. Créer la FeatureCollection
+var data = ee.FeatureCollection(
+  annees.map(function(annee) {
+    var idx = annees.indexOf(annee);
+    return ee.Feature(null, {
+      'Année': annee,
+      'Salinité': salinite.get(idx),
+      'Précipitations': precipitation.get(idx)
+    });
+  })
+);
+
+// 👁️ 3. Afficher la collection pour vérification
+print("Données de salinité et précipitations", data);
+
+// 📈 4. Créer le graphique à deux axes
+var chart = ui.Chart.feature.byFeature({
+  features: data,
+  xProperty: 'Année',
+  yProperties: ['Salinité', 'Précipitations']
+}).setChartType('LineChart')
+  .setOptions({
+    title: 'Évolution annuelle de la Salinité et des Précipitations (2014–2024)',
+    hAxis: {title: 'Année'},
+    series: {
+      0: {targetAxisIndex: 0, color: 'blue'},   // Salinité
+      1: {targetAxisIndex: 1, color: 'green'}   // Précipitations
+    },
+    vAxes: {
+      0: {title: 'Indice de Salinité'},
+      1: {title: 'Précipitations (mm)'}
+    },
+    pointSize: 5,
+    lineWidth: 2
+  });
+
+print(chart);

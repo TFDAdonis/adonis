@@ -1,0 +1,73 @@
+// 📍 1. Définir la région d’intérêt (ROI)
+var roi = ee.Geometry.Polygon([
+  [
+    [-0.5461, 35.0111],
+    [-0.4771, 35.0111],
+    [-0.4771, 35.0294],
+    [-0.5461, 35.0294],
+    [-0.5461, 35.0111]
+  ]
+]);
+
+// 📆 2. Fenêtre temporelle : 2014 à 2024
+var years = ee.List.sequence(2014, 2024);
+
+// 📦 3. Fonction pour charger et traiter les données Landsat
+var getAnnualSI = function(year) {
+  var startDate = ee.Date.fromYMD(year, 1, 1);
+  var endDate = startDate.advance(1, 'year');
+
+  // Charger la collection Landsat 8
+  var collection = ee.ImageCollection("LANDSAT/LC08/C02/T1_L2")
+    .filterBounds(roi)
+    .filterDate(startDate, endDate)
+    .filter(ee.Filter.lt('CLOUD_COVER', 20))
+    .select(['SR_B5', 'SR_B6']) // NIR et SWIR1
+    .map(function(image) {
+      return image.divide(10000).copyProperties(image, image.propertyNames());
+    });
+
+  // Moyenne annuelle
+  var meanImage = collection.mean();
+
+  // Calcul de l’indice de salinité : SI = SWIR1 / NIR
+  var si = meanImage.expression(
+    'SWIR1 / NIR', {
+      'SWIR1': meanImage.select('SR_B6'),
+      'NIR': meanImage.select('SR_B5')
+    }).rename('SI');
+
+  // Moyenne sur la zone
+  var meanValue = si.reduceRegion({
+    reducer: ee.Reducer.mean(),
+    geometry: roi,
+    scale: 30,
+    bestEffort: true,
+    maxPixels: 1e9
+  });
+
+  // Retourner un Feature (année, valeur SI)
+  return ee.Feature(null, {
+    'year': year,
+    'SI': meanValue.get('SI')
+  });
+};
+
+// 📊 4. Appliquer la fonction à chaque année
+var stats = ee.FeatureCollection(years.map(getAnnualSI));
+
+// 📈 5. Générer le graphique
+var chart = ui.Chart.feature.byFeature(stats, 'year', ['SI'])
+  .setChartType('LineChart')
+  .setOptions({
+    title: 'Évolution annuelle de l’Indice de Salinité (SI)',
+    hAxis: {title: 'Année'},
+    vAxis: {title: 'Indice de Salinité (SI)'},
+    lineWidth: 2,
+    pointSize: 5,
+    series: {
+      0: {color: 'red'}
+    }
+  });
+
+print('📈 Graphe de l’indice de salinité 2014–2024', chart)
