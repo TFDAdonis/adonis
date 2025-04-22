@@ -1,0 +1,5 @@
+Checkpoint before assistant change: Improve communication with the AI service to ensure accurate and reliable data
+
+Refactor `analyzeResults` function to use `fetch` for API calls, handle errors, and parse the JSON response correctly.
+
+Replit-Commit-Author: Assistant
